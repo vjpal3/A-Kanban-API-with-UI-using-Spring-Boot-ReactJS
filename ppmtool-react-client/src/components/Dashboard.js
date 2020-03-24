@@ -11,6 +11,8 @@ class Dashboard extends Component {
   }
 
   render() {
+    const { projects } = this.props.project;
+
     return (
       <div className="projects">
         <div className="container">
@@ -21,7 +23,9 @@ class Dashboard extends Component {
               <CreateProjectButton />
               <br />
               <hr />
-              <ProjectItem />
+              {projects.map(project => (
+                <ProjectItem key={project.id} project={project} />
+              ))}
             </div>
           </div>
         </div>
@@ -36,7 +40,7 @@ Dashboard.propTypes = {
 };
 
 const mapStateToProps = state => ({
-  project: state.projects
+  project: state.project
 });
 
 export default connect(mapStateToProps, { getProjects })(Dashboard);
