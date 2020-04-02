@@ -5,7 +5,7 @@ import {
 } from '../actions/types';
 
 const initialState = {
-  project_tasks: {},
+  project_tasks: [],
   project_task: {}
 };
 
