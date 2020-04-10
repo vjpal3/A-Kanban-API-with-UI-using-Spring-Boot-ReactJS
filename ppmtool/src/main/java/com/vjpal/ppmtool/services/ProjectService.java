@@ -7,6 +7,7 @@ import com.vjpal.ppmtool.domain.Backlog;
 import com.vjpal.ppmtool.domain.Project;
 import com.vjpal.ppmtool.domain.User;
 import com.vjpal.ppmtool.exceptions.ProjectIdException;
+import com.vjpal.ppmtool.exceptions.ProjectNotFoundException;
 import com.vjpal.ppmtool.repositories.BacklogRepository;
 import com.vjpal.ppmtool.repositories.ProjectRepository;
 import com.vjpal.ppmtool.repositories.UserRepository;
@@ -50,31 +51,34 @@ public class ProjectService {
 		}
 	}
 	
-	public Project findProjectByIdentifier(String projectId) {
-		
+	public Project findProjectByIdentifier(String projectId, String username) {
+		   
 		Project project = projectRepository.findByProjectIdentifier(projectId.toUpperCase());
 		
 		if(project == null) {
 			throw new ProjectIdException("Project Id: '" + projectId + "' does not exists!");
 		}
 		
+		if(!project.getProjectLeader().equals(username)) {
+			throw new ProjectNotFoundException("Project not found in your account!");
+		}
+		
 		return project;
 	}
 	
-	public Iterable<Project> findAllProjects() {
-		
-		return projectRepository.findAll();
+	public Iterable<Project> findAllProjects(String username) {
+		return projectRepository.findAllByProjectLeader(username);
 	}
 	
-	public void deleteProjectByIdentifier(String projectId) {
+	public void deleteProjectByIdentifier(String projectId, String username) {
 		
-		Project project = projectRepository.findByProjectIdentifier(projectId.toUpperCase());
-		
-		if(project == null) {
-			throw new ProjectIdException("Cannot find Project with ID '" + projectId + "'. This Project does not exists.");
-		}
-		
-		projectRepository.delete(project);
+//		Project project = projectRepository.findByProjectIdentifier(projectId.toUpperCase());
+//		
+//		if(project == null) {
+//			throw new ProjectIdException("Cannot find Project with ID '" + projectId + "'. This Project does not exists.");
+//		}
+//		
+		projectRepository.delete(findProjectByIdentifier(projectId, username));
 	}
 	
 }
