@@ -1,7 +1,5 @@
 package com.vjpal.ppmtool.services;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,55 +23,53 @@ public class ProjectTaskService {
 	
 	@Autowired
 	private ProjectRepository projectRepository;
+	
+	@Autowired
+	private ProjectService projectService;
 
-	public ProjectTask addProjectTask(String projectIdentifier, ProjectTask projectTask) {
+	public ProjectTask addProjectTask(String projectIdentifier, ProjectTask projectTask, String username) {
 		
-		//Exceptions: Project not found
-		try {
-
-			//PTs to be added to a specific project, project != null, BL exists
-			Backlog backlog = backlogRepository.findByProjectIdentifier(projectIdentifier);
+		//PTs to be added to a specific project, project != null, BL exists
+		// Backlog backlog = backlogRepository.findByProjectIdentifier(projectIdentifier);
+		Backlog backlog = projectService.findProjectByIdentifier(projectIdentifier, username).getBacklog();
 			
-			//set the Bl to PT
-			projectTask.setBacklog(backlog);
-			
-			//Our project sequence should be: IDPRO-1, IDPRO-2
-			Integer BacklogSequence = backlog.getPTSequence();
-			
-			// Update the BL Sequence
-			BacklogSequence++;
-			backlog.setPTSequence(BacklogSequence);
-			
-			//Add sequence to Project Task;
-			projectTask.setProjectSequence(projectIdentifier + "-" + BacklogSequence);
-			projectTask.setProjectIdentifier(projectIdentifier);
-			
-			//INITIAL priority when priority null
-			if(projectTask.getPriority() == 0 || projectTask.getPriority() == null) {
+		//set the Bl to PT
+		projectTask.setBacklog(backlog);
+		
+		//Our project sequence should be: IDPRO-1, IDPRO-2
+		Integer BacklogSequence = backlog.getPTSequence();
+		
+		// Update the BL Sequence
+		BacklogSequence++;
+		backlog.setPTSequence(BacklogSequence);
+		
+		//Add sequence to Project Task;
+		projectTask.setProjectSequence(projectIdentifier + "-" + BacklogSequence);
+		projectTask.setProjectIdentifier(projectIdentifier);
+		
+		//INITIAL priority when priority null
+		if(projectTask.getPriority() == null || projectTask.getPriority() == 0 ) {
 //			if(projectTask.getPriority() == null) {
-				projectTask.setPriority(3);
-			}
-			
-			//INITIAL Status when status is null
-			if(projectTask.getStatus() == "" || projectTask.getStatus() == null) {
-				projectTask.setStatus("TO_DO");
-			}
-			
-			return projectTaskRepository.save(projectTask);
-			
-		} catch(Exception e) {
-			throw new ProjectNotFoundException("Project Not found");
+			projectTask.setPriority(3);
 		}
 		
+		//INITIAL Status when status is null
+		if(projectTask.getStatus() == "" || projectTask.getStatus() == null) {
+			projectTask.setStatus("TO_DO");
+		}
+		
+		return projectTaskRepository.save(projectTask);
 	}
 
-	public Iterable<ProjectTask> findBacklogById(String id) {
+	public Iterable<ProjectTask> findBacklogById(String id, String username) {
 		
-		Project project = projectRepository.findByProjectIdentifier(id);
+//		Project project = projectRepository.findByProjectIdentifier(id);
+//		
+//		if(project == null) {
+//			throw new ProjectNotFoundException("Project with ID: '" + id + "' does not exist.");
+//		}
 		
-		if(project == null) {
-			throw new ProjectNotFoundException("Project with ID: '" + id + "' does not exist.");
-		}
+		projectService.findProjectByIdentifier(id, username);
 		
 		return projectTaskRepository.findByProjectIdentifierOrderByPriority(id);
 	}
