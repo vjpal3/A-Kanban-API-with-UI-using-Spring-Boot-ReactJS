@@ -46,7 +46,7 @@ export const login = (LoginRequest) => async (dispatch) => {
   } catch (error) {
     dispatch({
       type: GET_ERRORS,
-      payload: GET_ERRORS.response.data,
+      payload: error.response.data,
     });
   }
 };
